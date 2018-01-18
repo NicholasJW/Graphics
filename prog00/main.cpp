@@ -10,19 +10,25 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
+
+//TODO figure out difference between this and 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
 // STL
 #include <cmath>
 #include <chrono>
 #include <iostream>
 
 // GL
-#if   defined(OSX)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#include <GLUT/glut.h>
-#elif defined(LINUX)
+// #if   defined(OSX)
+// #pragma clang diagnostic push
+// #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+// #include <GLUT/glut.h>
+// #elif defined(LINUX)
 #include <GL/glut.h>
-#endif
+// #endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // Global variables - avoid these
@@ -168,7 +174,7 @@ draw() {
 
   //////////////////////////////////////////////////////////////////////////////
   // Record frame time
-  high_resolution_clock::time_point time = high_resolution_clock::now();
+  std::chrono::high_resolution_clock::time_point time = std::chrono::high_resolution_clock::now();
   g_frameRate = duration_cast<duration<float>>(time - g_frameTime).count();
   g_frameTime = time;
   g_framesPerSecond = 1.f/(g_delay + g_frameRate);

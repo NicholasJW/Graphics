@@ -1,3 +1,9 @@
-#Ignore c++ objects and executables
+#C++ objects
 *.o
 Dependencies
+
+#Visual Studio Code folder
+.vscode
+
+#Executables
+spiderling
