@@ -11,10 +11,10 @@
 // Includes
 
 
-//TODO figure out difference between this and 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+//TODO figure out difference between this and stl
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <math.h>
 
 // STL
 #include <cmath>
