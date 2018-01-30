@@ -12,7 +12,7 @@ OPTS = -O3
 #OPTS = -g
 FLAGS = -Wall -Werror
 ifeq "$(OS)" "LINUX"
-  DEFS = -DLINUX
+  #DEFS = -DLINUX
 else
   ifeq "$(OS)" "OSX"
   DEFS = -DOSX

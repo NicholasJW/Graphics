@@ -10,12 +10,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-
-//TODO figure out difference between this and stl
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <math.h>
-
 // STL
 #include <cmath>
 #include <chrono>
