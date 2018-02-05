@@ -1,15 +1,17 @@
+#define CHECK std::cout << "Check" << std::endl; 
+
 // STL
 #include <cmath>
 #include <chrono>
 #include <iostream>
 
+// GL
+#include <GL/glew.h>
 #include <GL/glut.h>
 #include <glm/glm.hpp>
 
 // Other classes
-#include "Model.h"
 #include "ObjParser.h"
-// #include "Display.h"
 
 // Window
 int g_width{1360};
@@ -19,96 +21,83 @@ int g_window{0};
 // Camera
 float g_theta{0.f};
 
+// Triangle
+static const GLfloat g_vertex_buffer_data[] = { 
+	-1.0f, -1.0f, 0.0f,
+	1.0f, -1.0f, 0.0f,
+	0.0f, 1.0f, 0.0f,
+};
+
+std::string objPath = "../SampleOBJ/diamond.obj";
+ObjParser *myParser;
+GLuint VertexArrayID;
+GLuint vertexbuffer;
+
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief Initialize GL settings
 void initialize() {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    // glClearDepth(1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_DEPTH_TEST);
+
+    // VAO
+    glGenVertexArrays(1, &VertexArrayID);
+    glBindVertexArray(VertexArrayID);
+
+    // Vertex Array Buffer
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// @brief Callback for resize of window
-///
-/// Responsible for setting window size (viewport) and projection matrix.
-void resize(GLint _w, GLint _h) {
-    g_width = _w;
-    g_height = _h;
+void draw(){
 
-    // Viewport
-    glViewport(0, 0, g_width, g_height);
-
-    // Projection
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(45.f, GLfloat(g_width)/g_height, 0.01f, 100.f);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// @brief Callback for drawing
-///
-/// Responsible for drawing the object
-void displayObj() {
-    using namespace std::chrono;
-
+    // glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Single directional light
-    static GLfloat lightPosition[] = { 0.5f, 1.0f, 1.5f, 0.0f };
-    static GLfloat whiteLight[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-    static GLfloat darkLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, darkLight);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteLight);
-
-    // Camera
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(10*std::sin(g_theta), 0.f, 10*std::cos(g_theta), 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
+    gluLookAt(10*std::sin(g_theta), 0.f, 10*std::cos(g_theta),
+            0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
 
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	glDisableVertexAttribArray(0);
+
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glutSwapBuffers();
 }
 
+
 int main(int argc, char* argv[]){
-    // using namespace std;
-    std::cout << "Checking arguments" << std::endl;
-    if(argc < 2){
-		  std::cerr << "PLease specify the OBJ file." << std::endl;
-		  exit(1);
-	  }
-    std::string modelPath = argv[1];
-
-    // Parsing
-    std::cout << "Start parsing" << std::endl;
-    ObjParser *myParser = new ObjParser(modelPath);
-    std::cout << "End parsing" << std::endl;
-
-    // Glut
+    std::cout << "Initializing GLUTWindow" << std::endl;
+    // GLUT
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowPosition(100, 100);
+    glutInitWindowPosition(50, 100);
     glutInitWindowSize(g_width, g_height); // HD size
-    g_window = glutCreateWindow("Maverinick: I still don't know what this is.");
-
-    // GL
+    g_window = glutCreateWindow("MAVERINICK");
+    
+    glewExperimental = GL_TRUE; 
+    glewInit();
     initialize();
-
-    //////////////////////////////////////////////////////////////////////////////
-    // Assign callback functions
-    std::cout << "Assigning Callback functions" << std::endl;
-    glutReshapeFunc(resize);
-    glutDisplayFunc(displayObj);
-
-    // Start Application
+    glutDisplayFunc(draw);
+    // Start application
     std::cout << "Starting Application" << std::endl;
     glutMainLoop();
 
-    delete myParser;
+    glDeleteBuffers(1, &vertexbuffer);
+    glDeleteVertexArrays(1, &VertexArrayID);
     return 0;
 }
-
-// #if   defined(OSX)
-// #pragma clang diagnostic pop
-// #endif

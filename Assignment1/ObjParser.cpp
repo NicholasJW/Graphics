@@ -11,8 +11,7 @@ ObjParser::ObjParser(std::string path){
 	}
     string line;
 
-    while(!infile.eof()){
-		getline(infile, line);
+    while(getline(infile, line)){
 		if (line.substr(0,2) == "v "){
             float x,y,z;
             istringstream vs(line.substr(2));
@@ -27,7 +26,8 @@ ObjParser::ObjParser(std::string path){
             vs>>a; vs>>b; vs>>c;
             indices = glm::vec3(a, b, c);
             normals.push_back(indices);
-        }
+        }//So far only care about vertex and face
+        
 	}
 
 

@@ -4,7 +4,7 @@ CC = g++ -std=c++17
 DEBUG = -g
 CFLAGS = -Wall -c $(DEBUG)
 LFLAGS = -Wall $(DEBUG)
-LIBS = -lglut -lGLU -lGL
+LIBS = -lglut -lGLU -lGL -lGLEW
 
 EXECUTABLE = mav
 OBJS = main.o ObjParser.o Model.o

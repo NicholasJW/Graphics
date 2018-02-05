@@ -2,6 +2,7 @@
 #define __OBJPARSER_H__
 // GLM
 #include <glm/glm.hpp>
+
 // STL
 #include <vector>
 #include <iostream>
@@ -16,10 +17,9 @@ public:
     ~ObjParser(){};
 
 private:
-
     std::vector< glm::vec3 > vertices;
     std::vector< glm::vec3 > normals;
-
+    std::vector< glm::vec3 > mesh;
 };
 
 #endif
