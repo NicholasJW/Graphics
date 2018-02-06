@@ -7,16 +7,13 @@ LFLAGS = -Wall $(DEBUG)
 LIBS = -lglut -lGLU -lGL -lGLEW
 
 EXECUTABLE = mav
-OBJS = main.o ObjParser.o Model.o
+OBJS = main.o ObjParser.o
 
 $(EXECUTABLE): $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) $(LIBS) -o $(EXECUTABLE)
 
-main.o: main.cpp ObjParser.o Model.o
+main.o: main.cpp ObjParser.o
 	$(CC) $(CFLAGS) $(LIBS) main.cpp
-
-Model.o: Model.cpp Model.h ObjParser.o
-	$(CC) $(CFLAGS) $(LIBS) Model.cpp
 
 ObjParser.o: ObjParser.cpp ObjParser.h
 	$(CC) $(CFLAGS) $(LIBS) ObjParser.cpp

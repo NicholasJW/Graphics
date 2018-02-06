@@ -2,6 +2,9 @@
 #include <cmath>
 #include <chrono>
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <fstream>
 
 #include <GL/glut.h>
 #include "ObjParser.h"
@@ -10,6 +13,16 @@
 int g_width{1360};
 int g_height{768};
 int g_window{0};
+
+// Booleans for displaystyle
+bool isVert = false;
+bool isLined = false;
+bool isNormal = true;
+// Color Vec
+glm::vec3 colorVec(1.0f, 1.0f, 1.0f);
+// Line width
+GLfloat lineWidth = 1.0;
+GLfloat pointSize = 1.0;
 
 // Camera
 float g_theta{0.f};
@@ -35,7 +48,7 @@ float g_framesPerSecond{0.f};
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief Initialize GL settings
 void initialize() {
-  glClearColor(0.f, 0.f, 0.4f, 0.f);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.f);
   glEnable(GL_COLOR_MATERIAL);
   glEnable(GL_DEPTH_TEST);
 }
@@ -98,31 +111,48 @@ void draw() {
   // Camera
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  gluLookAt(10*std::sin(g_theta), 0.f, 10*std::cos(g_theta),
+  gluLookAt(50*std::sin(g_theta), 0.f, 50*std::cos(g_theta),
             0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
 
   // Model of cube
-  glColor3f(0.6f, 0.f, 0.f);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  glBegin(GL_TRIANGLES);
-
-  for(unsigned int i = 0; i<faces.size(); i++){
-    glNormal3f(normals.at(i).x, normals.at(i).y, normals.at(i).z);
-    glm::vec3 p1 = vertices[faces.at(i).x - 1];
-    glm::vec3 p2 = vertices[faces.at(i).y - 1];
-    glm::vec3 p3 = vertices[faces.at(i).z - 1];
-    glVertex3f(p1.x, p1.y, p1.z);
-    glVertex3f(p2.x, p2.y, p2.z);
-    glVertex3f(p3.x, p3.y, p3.z);
+  if(isNormal){
+    glColor3f(colorVec.x, colorVec.y, colorVec.z);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glBegin(GL_TRIANGLES);
+    for(unsigned int i = 0; i<faces.size(); i++){
+      glNormal3f(normals.at(i).x, normals.at(i).y, normals.at(i).z);
+      glm::vec3 p1 = vertices[faces.at(i).x - 1];
+      glm::vec3 p2 = vertices[faces.at(i).y - 1];
+      glm::vec3 p3 = vertices[faces.at(i).z - 1];
+      glVertex3f(p1.x, p1.y, p1.z);
+      glVertex3f(p2.x, p2.y, p2.z);
+      glVertex3f(p3.x, p3.y, p3.z);
+    }
+    glEnd();
+  }else if(isLined){
+    glColor3f(colorVec.x, colorVec.y, colorVec.z);
+    glLineWidth(lineWidth);
+    glBegin(GL_LINE_LOOP);
+      for(unsigned int i = 0; i<faces.size(); i++){
+        // glNormal3f(normals.at(i).x, normals.at(i).y, normals.at(i).z);
+        glm::vec3 p1 = vertices[faces.at(i).x - 1];
+        glm::vec3 p2 = vertices[faces.at(i).y - 1];
+        glm::vec3 p3 = vertices[faces.at(i).z - 1];
+        glVertex3f(p1.x, p1.y, p1.z);
+        glVertex3f(p2.x, p2.y, p2.z);
+        glVertex3f(p3.x, p3.y, p3.z);
+      }
+    glEnd();
+  }else{
+    glColor3f(colorVec.x, colorVec.y, colorVec.z);
+    glEnable(GL_PROGRAM_POINT_SIZE_EXT);
+    glPointSize(pointSize);
+    glBegin(GL_POINTS);
+      for(unsigned int i = 0; i<vertices.size(); i++){
+        glVertex3f(vertices.at(i).x, vertices.at(i).y, vertices.at(i).z);
+      }
+    glEnd();
   }
-
-  // glNormal3f( 0.f, -1.f,  0.f); // top
-  // glVertex3f(-1.f, -1.f, -1.f);
-  // glVertex3f(-1.f, -1.f,  1.f);
-  // glVertex3f( 1.f, -1.f,  1.f);
-
-  glEnd();
-
   //////////////////////////////////////////////////////////////////////////////
   // Show
   glutSwapBuffers();
@@ -133,7 +163,7 @@ void draw() {
   g_frameRate = duration_cast<duration<float>>(time - g_frameTime).count();
   g_frameTime = time;
   g_framesPerSecond = 1.f/(g_delay + g_frameRate);
-  printf("FPS: %6.2f\n", g_framesPerSecond);
+  // printf("FPS: %6.2f\n", g_framesPerSecond);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -148,6 +178,70 @@ void keyPressed(GLubyte _key, GLint _x, GLint _y) {
       std::cout << "Destroying window: " << g_window << std::endl;
       glutDestroyWindow(g_window);
       g_window = 0;
+      break;
+    case 86:
+      isVert = true;
+      isLined = false;
+      isNormal = false;
+      break;
+    case 76:
+      isVert = false;
+      isLined = true;
+      isNormal = false;
+      break;
+    case 78:
+      isVert = false;
+      isLined = false;
+      isNormal = true;
+      break;
+    case 118:
+      isVert = true;
+      isLined = false;
+      isNormal = false;
+      break;
+    case 108:
+      isVert = false;
+      isLined = true;
+      isNormal = false;
+      break;
+    case 110:
+      isVert = false;
+      isLined = false;
+      isNormal = true;
+      break;
+    case 82:
+      colorVec.x = 1.0f;
+      colorVec.y = 0.0f;
+      colorVec.z = 0.0f;
+      break;
+    case 71:
+      colorVec.x = 0.0f;
+      colorVec.y = 1.0f;
+      colorVec.z = 0.0f;
+      break;
+    case 66:
+      colorVec.x = 0.0f;
+      colorVec.y = 0.0f;
+      colorVec.z = 1.0f;
+      break;
+    case 87:
+      colorVec.x = 1.0f;
+      colorVec.y = 1.0f;
+      colorVec.z = 1.0f;
+      break;
+    case 43:
+      if(isLined){
+        lineWidth += 0.1;
+      }else if(isVert){
+        pointSize += 0.1;
+      }
+      break;
+    case 45:
+      if(isLined){
+        lineWidth -= 0.1;
+      }else if(isVert){
+        pointSize -= 0.1;
+      }
       break;
     // Unhandled
     default:
@@ -177,6 +271,33 @@ void specialKeyPressed(GLint _key, GLint _x, GLint _y) {
   }
 }
 
+// Private debugging method
+void printArray(std::string filePath){
+  std::stringstream ss;
+  ss << "Normal vectors: \n";
+  for (unsigned int i = 0; i < normals.size(); i++){
+    ss << normals.at(i).x << ' ' << normals.at(i).y << ' ' << normals.at(i).z << " \n";
+  }
+  ss << "Face indices: \n";
+  for (unsigned int i = 0; i < faces.size(); i++){
+    ss << faces.at(i).x << ' ' << faces.at(i).y << ' ' << faces.at(i).z << " \n";
+  }
+  ss << "Vertices: \n";
+  for (unsigned int i = 0; i < vertices.size(); i++){
+    ss << std::to_string(i+1) << ':' << vertices.at(i).x << ' ' << vertices.at(i).y << ' ' << vertices.at(i).z << " \n";
+  }
+  
+  if (filePath == " "){
+    std::cout << ss.str() << std::endl;
+  }else{
+    std::ofstream outFile;
+    outFile.open(filePath);
+    outFile << ss.str();
+    outFile.close();
+  }
+  // ss.close();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Main
 
@@ -198,6 +319,11 @@ int main(int argc, char* argv[]) {
   normals = myParser->getNormals();
   std::cout << "End Parsing" << std::endl;
   delete myParser;
+
+  // Just for debugging
+  std::string outputFile = "output.txt";
+  printArray(outputFile);
+
   //////////////////////////////////////////////////////////////////////////////
   // Initialize GLUT Window
   std::cout << "Initializing GLUTWindow" << std::endl;
@@ -226,3 +352,4 @@ int main(int argc, char* argv[]) {
 
   return 0;
 }
+

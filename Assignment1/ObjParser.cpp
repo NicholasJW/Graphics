@@ -17,6 +17,9 @@ ObjParser::ObjParser(std::string path){
             istringstream vs(line.substr(2));
             glm::vec3 vert;
             vs>>x; vs>>y; vs>>z;
+            x = x/8;
+            y = y/8;
+            z = z/8;
             vert = glm::vec3(x, y, z);
             vertices.push_back(vert);
         }else if (line.substr(0,2) == "f "){
@@ -40,10 +43,15 @@ ObjParser::ObjParser(std::string path){
         glm::vec3 v = p3 - p1;
         
         glm::vec3 norm(u.x*v.x, u.y*v.y, u.z*v.z);
+        float mag = pow(norm.x, 2) + pow(norm.y, 2) + pow(norm.z, 2);
+        mag = sqrt(mag);
+        norm.x = (norm.x)/mag;
+        norm.y = (norm.y)/mag;
+        norm.z = (norm.z)/mag;
         normals.push_back(norm);
     }
 
     if(!(normals.size() == faces.size())){
-        std::cerr << "Something funking when parsing." << std::endl;
+        std::cerr << "Something funky when parsing." << std::endl;
     }
 }
