@@ -17,12 +17,13 @@ ObjParser::ObjParser(std::string path){
             istringstream vs(line.substr(2));
             glm::vec3 vert;
             vs>>x; vs>>y; vs>>z;
-            x = x/8;
-            y = y/8;
-            z = z/8;
+            x = x/vertexMult;
+            y = y/vertexMult;
+            z = z/vertexMult;
             vert = glm::vec3(x, y, z);
             vertices.push_back(vert);
         }else if (line.substr(0,2) == "f "){
+            line = cleanString(line);
             int a,b,c;
             istringstream vs(line.substr(2));
             glm::vec3 indices;
@@ -55,3 +56,37 @@ ObjParser::ObjParser(std::string path){
         std::cerr << "Something funky when parsing." << std::endl;
     }
 }
+
+std::string ObjParser::cleanString(std::string s){
+    std::string theS = s;
+    char lookFor = '/';
+    int start = -1;
+    int length = 0;
+    for(unsigned int i = 0; i < theS.length(); i++){
+        if (theS[i] == '/'){
+            if (lookFor == '/'){
+                lookFor = ' ';
+                start = i;
+            }
+            length ++;
+        }else if (theS[i] == ' '){
+            if (lookFor == ' '){
+                length ++;
+                theS = theS.substr(0, start) + ' ' +  theS.substr(start+length - 1);
+                lookFor = '/';
+                start = -1;
+                length = 0;
+            }
+        }else{
+            if (lookFor == ' '){
+                length ++;
+            }
+        }
+    }
+    
+    if(theS.find("/") != std::string::npos){
+        theS = theS.substr(0, theS.find("/"));
+    }
+
+    return theS;
+}   

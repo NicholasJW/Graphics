@@ -21,9 +21,10 @@ bool isNormal = true;
 // Color Vec
 glm::vec3 colorVec(1.0f, 1.0f, 1.0f);
 // Line width
-GLfloat lineWidth = 1.0;
-GLfloat pointSize = 1.0;
-
+GLfloat lineWidth = 1.0f;
+GLfloat pointSize = 3.0f;
+// Zoomer
+float zoomer = 1.0;
 // Camera
 float g_theta{0.f};
 
@@ -113,6 +114,12 @@ void draw() {
   glLoadIdentity();
   gluLookAt(50*std::sin(g_theta), 0.f, 50*std::cos(g_theta),
             0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
+
+  for (unsigned int i = 0; i < vertices.size(); i++){
+    vertices.at(i).x = vertices.at(i).x*zoomer;
+    vertices.at(i).y = vertices.at(i).y*zoomer;
+    vertices.at(i).z = vertices.at(i).z*zoomer;
+  }
 
   // Model of cube
   if(isNormal){
@@ -263,6 +270,12 @@ void specialKeyPressed(GLint _key, GLint _x, GLint _y) {
       break;
     case GLUT_KEY_RIGHT:
       g_theta += 0.02;
+      break;
+    case GLUT_KEY_UP:
+      zoomer += 0.001;
+      break;
+    case GLUT_KEY_DOWN:
+      zoomer -= 0.001;
       break;
     // Unhandled
     default:

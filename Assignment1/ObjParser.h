@@ -21,6 +21,9 @@ public:
     std::vector< glm::vec3 > getNormals(){return normals;};
     
 private:
+    int vertexMult = 5;
+    // Private helper method
+    std::string cleanString(std::string s);
     std::vector< glm::vec3 > vertices;
     std::vector< glm::vec3 > faces;
     std::vector< glm::vec3 > normals;
