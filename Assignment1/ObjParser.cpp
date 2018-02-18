@@ -43,7 +43,7 @@ ObjParser::ObjParser(std::string path){
         glm::vec3 u = p2 - p1;
         glm::vec3 v = p3 - p1;
         
-        glm::vec3 norm(u.x*v.x, u.y*v.y, u.z*v.z);
+        glm::vec3 norm(u.y*v.z - u.z*v.y, u.z*v.x - u.x*v.z, u.x*v.y - u.y*v.x);
         float mag = pow(norm.x, 2) + pow(norm.y, 2) + pow(norm.z, 2);
         mag = sqrt(mag);
         norm.x = (norm.x)/mag;

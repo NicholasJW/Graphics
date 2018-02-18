@@ -345,7 +345,7 @@ int main(int argc, char* argv[]) {
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
   glutInitWindowPosition(50, 100);
   glutInitWindowSize(g_width, g_height); // HD size
-  g_window = glutCreateWindow("Spiderling: A Rudamentary Game Engine");
+  g_window = glutCreateWindow("Maverinick");
 
   // GL
   initialize();
