@@ -16,7 +16,7 @@ public:
     // Contructor and destructor
     ObjParser(std::string path);
     ~ObjParser(){};
-    std::vector< glm::vec3 > getVertices(){return vertices;};
+    const std::vector< glm::vec3 >& getVertices(){return vertices;};
     std::vector< glm::vec3 > getFaces(){return faces;};
     std::vector< glm::vec3 > getNormals(){return normals;};
     
