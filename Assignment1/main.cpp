@@ -139,12 +139,15 @@ void draw() {
   }else if(isLined){
     glColor3f(colorVec.x, colorVec.y, colorVec.z);
     glLineWidth(lineWidth);
-    glBegin(GL_LINE_LOOP);
+    glBegin(GL_LINES);
       for(unsigned int i = 0; i<faces.size(); i++){
         // glNormal3f(normals.at(i).x, normals.at(i).y, normals.at(i).z);
         glm::vec3 p1 = vertices[faces.at(i).x - 1];
         glm::vec3 p2 = vertices[faces.at(i).y - 1];
         glm::vec3 p3 = vertices[faces.at(i).z - 1];
+        glVertex3f(p1.x, p1.y, p1.z);
+        glVertex3f(p2.x, p2.y, p2.z);
+        glVertex3f(p3.x, p3.y, p3.z);
         glVertex3f(p1.x, p1.y, p1.z);
         glVertex3f(p2.x, p2.y, p2.z);
         glVertex3f(p3.x, p3.y, p3.z);

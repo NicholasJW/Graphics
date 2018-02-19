@@ -1,4 +1,4 @@
-#C++ objects
+#c++ objects
 *.o
 Dependencies
 
@@ -9,6 +9,7 @@ Dependencies
 /Tutorial 0.3.8
 OGLPG-9th-Edition
 /ogl-master
+/sampleCode
 
 #Executables
 mav
