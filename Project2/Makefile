@@ -20,3 +20,6 @@ ObjParser.o: ObjParser.cpp ObjParser.h
 
 clean:
 	rm -f $(EXECUTABLE) $(OBJS)
+
+go:
+	./mav ../SampleOBJ/spiderTri.obj ../SampleOBJ/drumTri.obj

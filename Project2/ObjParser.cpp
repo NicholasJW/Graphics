@@ -22,71 +22,75 @@ ObjParser::ObjParser(std::string path){
             z = z/vertexMult;
             vert = glm::vec3(x, y, z);
             vertices.push_back(vert);
+        }else if (line.substr(0,3) == "vn "){
+            float x,y,z;
+            istringstream vs(line.substr(3));
+            glm::vec3 vert;
+            vs>>x; vs>>y; vs>>z;
+            vert = glm::vec3(x, y, z);
+            normals.push_back(vert);
+        }else if (line.substr(0,3) == "vt "){
+            float x,y,z;
+            istringstream vs(line.substr(3));
+            glm::vec3 vert;
+            vs>>x; vs>>y; vs>>z;
+            vert = glm::vec3(x, y, z);
+            texts.push_back(vert);
         }else if (line.substr(0,2) == "f "){
-            line = cleanString(line);
-            int a,b,c;
+            string p1, p2, p3;
             istringstream vs(line.substr(2));
-            glm::vec3 indices;
-            vs>>a; vs>>b; vs>>c;
-            indices = glm::vec3(a, b, c);
-            faces.push_back(indices);
-        }//So far only care about vertex and face   
+            vs>>p1; vs>>p2; vs>>p3;
+            stringstream ss(p1);
+            face cf;
+            for (int i = 0; i < 3; i++){
+                string v,t,n;
+                getline(ss, v, '/');
+                getline(ss, t, '/');
+                getline(ss, n, '/');
+                vertex cv;
+                cv.vIndex = stoi(v)-1;
+                cv.tIndex = stoi(t)-1;
+                cv.nIndex = stoi(n)-1;
+                switch(i){
+                    case 0:
+                        cf.v1 = cv;
+                        ss.clear();
+                        ss.str(p2);
+                        break;
+                    case 1:
+                        cf.v2 = cv;
+                        ss.clear();
+                        ss.str(p3);
+                        break;
+                    case 2:
+                        cf.v3 = cv;
+                        break;
+                }
+            }
+            ss.clear();
+            faces.push_back(cf);
+        }
 	}
+
     infile.close();
 
-    // Calculate normals
-    for(unsigned int i = 0; i < faces.size(); i++){
-        glm::vec3 p1 = vertices[faces.at(i).x - 1];
-        glm::vec3 p2 = vertices[faces.at(i).y - 1];
-        glm::vec3 p3 = vertices[faces.at(i).z - 1];
-
-        glm::vec3 u = p2 - p1;
-        glm::vec3 v = p3 - p1;
-        
-        glm::vec3 norm(u.y*v.z - u.z*v.y, u.z*v.x - u.x*v.z, u.x*v.y - u.y*v.x);
-        float mag = pow(norm.x, 2) + pow(norm.y, 2) + pow(norm.z, 2);
-        mag = sqrt(mag);
-        norm.x = (norm.x)/mag;
-        norm.y = (norm.y)/mag;
-        norm.z = (norm.z)/mag;
-        normals.push_back(norm);
-    }
-
-    if(!(normals.size() == faces.size())){
-        std::cerr << "Something funky when parsing." << std::endl;
-    }
 }
 
-std::string ObjParser::cleanString(std::string s){
-    std::string theS = s;
-    char lookFor = '/';
-    int start = -1;
-    int length = 0;
-    for(unsigned int i = 0; i < theS.length(); i++){
-        if (theS[i] == '/'){
-            if (lookFor == '/'){
-                lookFor = ' ';
-                start = i;
-            }
-            length ++;
-        }else if (theS[i] == ' '){
-            if (lookFor == ' '){
-                length ++;
-                theS = theS.substr(0, start) + ' ' +  theS.substr(start+length - 1);
-                lookFor = '/';
-                start = -1;
-                length = 0;
-            }
-        }else{
-            if (lookFor == ' '){
-                length ++;
-            }
-        }
-    }
-    
-    if(theS.find("/") != std::string::npos){
-        theS = theS.substr(0, theS.find("/"));
-    }
+void ObjParser::drawObj(){
+    // glColor3f(1.0f, 1.0f, 1.0f);
+    glBegin(GL_TRIANGLES);
+    for(unsigned int i = 0; i < faces.size(); i++){        
+        // First point
+        glNormal3f(normals[faces[i].v1.nIndex].x, normals[faces[i].v1.nIndex].x, normals[faces[i].v1.nIndex].x);
+        glVertex3f(vertices[faces[i].v1.vIndex].x, vertices[faces[i].v1.vIndex].y, vertices[faces[i].v1.vIndex].z);
+        // Second point
+        glNormal3f(normals[faces[i].v2.nIndex].x, normals[faces[i].v2.nIndex].x, normals[faces[i].v2.nIndex].x);
+        glVertex3f(vertices[faces[i].v2.vIndex].x, vertices[faces[i].v2.vIndex].y, vertices[faces[i].v2.vIndex].z);
+        // Third point
+        glNormal3f(normals[faces[i].v3.nIndex].x, normals[faces[i].v3.nIndex].x, normals[faces[i].v3.nIndex].x);
+        glVertex3f(vertices[faces[i].v3.vIndex].x, vertices[faces[i].v3.vIndex].y, vertices[faces[i].v3.vIndex].z);
 
-    return theS;
-}   
+    }
+    glEnd();
+
+}

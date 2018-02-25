@@ -1,6 +1,7 @@
 #ifndef __OBJPARSER_H__
 #define __OBJPARSER_H__
 // GLM
+#include <GL/glut.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
@@ -16,17 +17,30 @@ public:
     // Contructor and destructor
     ObjParser(std::string path);
     ~ObjParser(){};
-    std::vector< glm::vec3 > getVertices(){return vertices;};
-    std::vector< glm::vec3 > getFaces(){return faces;};
-    std::vector< glm::vec3 > getNormals(){return normals;};
-    
+
+    void drawObj();
+    float getVertexMult(){return vertexMult;};
+    void setVertexMult(float x){vertexMult = x;};
+
 private:
-    int vertexMult = 5;
-    // Private helper method
-    std::string cleanString(std::string s);
+    struct vertex{
+        int vIndex;
+        int tIndex;
+        int nIndex;
+    };
+
+    struct face{
+        vertex v1;
+        vertex v2;
+        vertex v3;
+    };
+
+    float vertexMult = 30;
+    
     std::vector< glm::vec3 > vertices;
-    std::vector< glm::vec3 > faces;
+    std::vector< glm::vec3 > texts;
     std::vector< glm::vec3 > normals;
+    std::vector< face > faces;
 
 };
 
