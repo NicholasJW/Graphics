@@ -17,9 +17,9 @@ ObjParser::ObjParser(std::string path){
             istringstream vs(line.substr(2));
             glm::vec3 vert;
             vs>>x; vs>>y; vs>>z;
-            x = x/vertexMult;
-            y = y/vertexMult;
-            z = z/vertexMult;
+            // x = x/30;
+            // y = y/30;
+            // z = z/30;
             vert = glm::vec3(x, y, z);
             vertices.push_back(vert);
         }else if (line.substr(0,3) == "vn "){

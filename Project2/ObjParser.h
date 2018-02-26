@@ -19,8 +19,8 @@ public:
     ~ObjParser(){};
 
     void drawObj();
-    float getVertexMult(){return vertexMult;};
-    void setVertexMult(float x){vertexMult = x;};
+    // float getVertexMult(){return vertexMult;};
+    // void setVertexMult(float x){vertexMult = x;};
 
 private:
     struct vertex{
@@ -35,8 +35,6 @@ private:
         vertex v3;
     };
 
-    float vertexMult = 30;
-    
     std::vector< glm::vec3 > vertices;
     std::vector< glm::vec3 > texts;
     std::vector< glm::vec3 > normals;

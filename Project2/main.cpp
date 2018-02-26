@@ -7,6 +7,7 @@
 #include <GL/glut.h>
 #include "ObjParser.h"
 
+// Winodw
 int g_width{1360};
 int g_height{768};
 int g_window{0};
@@ -14,13 +15,22 @@ int g_window{0};
 // Color Vec
 glm::vec3 colorVec(1.0f, 1.0f, 1.0f);
 
-// Zoomer
-float zoomer = 1.0;
+struct object{
+	std::string filename;
+	glm::vec3 DEFAULT_COLOR;
+	glm::vec3 color;
+	glm::vec3 trans;
+	glm::vec3 scale;
+	glm::vec4 rotat;
+};
 
 // Camera
-float g_theta{0.f};
+float g_theta{0.f}; //horizontal
+float up_angle{1.57f};
+float zoomer{20.f};
 
-// ObjParser
+// ObjParsers
+std::vector<object> objs;
 std::vector<ObjParser> parsers;
 
 // Frame rate
@@ -58,6 +68,14 @@ void timer(int _v) {
     	exit(0);
 }
 
+void randomCol(){
+	for(size_t i = 0; i < objs.size(); i++){
+		objs[i].color.x=(float) rand() / (RAND_MAX);
+		objs[i].color.y=(float) rand() / (RAND_MAX);
+		objs[i].color.z=(float) rand() / (RAND_MAX);
+	}
+}
+
 void draw(){
 	using namespace std::chrono;
 	// std::cout << "Start drawing" << std::endl;
@@ -74,26 +92,17 @@ void draw(){
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(30*std::sin(g_theta), 0.f, 30*std::cos(g_theta), 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
+	gluLookAt(zoomer*std::sin(g_theta)*std::sin(up_angle), zoomer*std::cos(up_angle), -zoomer*std::cos(g_theta)*std::sin(up_angle), 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
 
-	// World
-	glPushMatrix();
-	glTranslatef(-7.0f, 0.f, 0.f);
-	// Spider
-	glPushMatrix();
-	glColor3f(1.f, 0.f, 0.f);
-	glTranslatef(6.5f, -1.f, -2.5f);
-	glScalef(0.25f, 0.25f, 0.25f);
-	parsers[0].drawObj();
-	glPopMatrix();
-	// Drumset
-	glPushMatrix();
-	glTranslatef(-30.f, 0.f, 0.f);
-	glColor3f(1.f, 1.f, 1.f);
-	parsers[1].drawObj();
-	glPopMatrix();
-	glPopMatrix();
-
+	for (size_t i = 0; i < parsers.size(); i++){
+		glColor3f(objs[i].color.x, objs[i].color.y, objs[i].color.z);
+		glPushMatrix();
+		glTranslatef(objs[i].trans.x, objs[i].trans.y, objs[i].trans.z);
+		glRotatef(objs[i].rotat.x, objs[i].rotat.y, objs[i].rotat.z, objs[i].rotat.w);
+		glScalef(objs[i].scale.x, objs[i].scale.y, objs[i].scale.z);
+		parsers[i].drawObj();
+		glPopMatrix();
+	}
 
 	glutSwapBuffers();
 
@@ -111,6 +120,20 @@ void keyPressed(GLubyte _key, GLint _x, GLint _y) {
     	glutDestroyWindow(g_window);
     	g_window = 0;
     	break;
+	case 119:
+		zoomer -= 0.3;
+		break;
+	case 115:
+		zoomer += 0.3;
+		break;
+	case 114:
+		randomCol();
+		break;
+	case 100:
+		for(size_t i = 0; i < objs.size(); i++){
+			objs[i].color = objs[i].DEFAULT_COLOR;
+		}
+		break;
     // Unhandled
     default:
     	std::cout << "Unhandled key: " << (int)(_key) << std::endl;
@@ -128,10 +151,10 @@ void specialKeyPressed(GLint _key, GLint _x, GLint _y) {
 			g_theta += 0.02;
 			break;
 		case GLUT_KEY_UP:
-			zoomer += 0.001;
+			up_angle -= 0.02;
 			break;
 		case GLUT_KEY_DOWN:
-			zoomer -= 0.001;
+			up_angle += 0.02;
 			break;
 		// Unhandled
 		default:
@@ -140,24 +163,76 @@ void specialKeyPressed(GLint _key, GLint _x, GLint _y) {
   	}
 }
 
+void parseConfig(std::string path){
+	using namespace std;
+	ifstream infile;
+	infile.open(path.c_str());
+	if(!infile.good()){
+		throw invalid_argument("Failed to open config file.");
+	}
+    string line;
+	object co;
+
+	while(getline(infile, line)){
+		if (line[0] == '#')
+			continue;
+		
+		if (line.substr(0, 6) == "filep "){
+			co.filename = line.substr(6);
+		}else if (line.substr(0,6) == "color "){
+			istringstream ss(line.substr(6));
+			float x, y, z;
+			ss >> x;
+			ss >> y;
+			ss >> z;
+			co.color = glm::vec3(x,y,z);
+			ss.str("");
+		}else if (line.substr(0,6) == "trans "){
+			istringstream ss(line.substr(6));
+			float x, y, z;
+			ss >> x;
+			ss >> y;
+			ss >> z;
+			co.trans = glm::vec3(x,y,z);
+			ss.str("");
+		}else if (line.substr(0,6) == "scale "){
+			istringstream ss(line.substr(6));
+			float x, y, z;
+			ss >> x;
+			ss >> y;
+			ss >> z;
+			co.scale = glm::vec3(x,y,z);
+			ss.str("");
+		}else if (line.substr(0,6) == "rotat "){
+			istringstream ss(line.substr(6));
+			float x, y, z, w;
+			ss >> x;
+			ss >> y;
+			ss >> z;
+			ss >> w;
+			co.rotat = glm::vec4(x,y,z,w);
+			ss.str("");
+			objs.push_back(co);
+		}
+		
+	}
+}
 
 int main(int argc, char* argv[]){
-	if(argc < 2){
-		std::cerr << "PLease specify the OBJ file." << std::endl;
+	if(argc < 2||argc > 2){
+		std::cerr << "PLease specify the config file." << std::endl;
 		exit(1);
 	}
 
 	std::cout << "Start Parsing" << std::endl;
-	for (int i = 1; i < argc; i++){
-		parsers.push_back(ObjParser(argv[i]));
-		// switch(i){
-		// 	case 1:
-		// 		parsers[i-1].setVertexMult(1.0f);
-		// 		break;
-		// 	case 2:
-		// 		parsers[i-1].setVertexMult(1.0f);
-		// 		break;
-		// }
+	parseConfig(argv[1]);
+	// Set default color
+	for(size_t i = 0; i < objs.size(); i++){
+		objs[i].DEFAULT_COLOR = objs[i].color;
+	}
+	// Parse data
+	for (size_t i = 0; i < objs.size(); i++){
+		parsers.push_back(ObjParser(objs[i].filename));
 	}
 	std::cout << "End Parsing" << std::endl;
 
@@ -178,12 +253,7 @@ int main(int argc, char* argv[]){
 	glutSpecialFunc(specialKeyPressed);
 	glutTimerFunc(1000/FPS, timer, 0);
 
-	// for (size_t i = 0; i < parsers.size(); i++){
-	// 	std::cout << parsers[i].getVertexMult() << std::endl;
-	// }
-
 	std::cout << "Start rendering" << std::endl;
 	// Go to main loop
 	glutMainLoop();
-	// delete myParser;
 }

@@ -22,4 +22,4 @@ clean:
 	rm -f $(EXECUTABLE) $(OBJS)
 
 go:
-	./mav ../SampleOBJ/spiderTri.obj ../SampleOBJ/drumTri.obj
+	./mav world.config
