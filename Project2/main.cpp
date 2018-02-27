@@ -12,9 +12,6 @@ int g_width{1360};
 int g_height{768};
 int g_window{0};
 
-// Color Vec
-glm::vec3 colorVec(1.0f, 1.0f, 1.0f);
-
 struct object{
 	std::string filename;
 	glm::vec3 DEFAULT_COLOR;
@@ -25,9 +22,26 @@ struct object{
 };
 
 // Camera
-float g_theta{0.f}; //horizontal
-float up_angle{1.57f};
-float zoomer{20.f};
+// float g_theta{0.f}; //horizontal
+// float up_angle{1.57f};
+// float zoomer{20.f};
+struct camera{
+	glm::vec3 eyePos;
+	glm::vec3 lookAt; // this is centered at the eyeposition
+	glm::vec3 upVec;
+} cam;
+
+struct camVectors{
+	glm::vec3 lookVec;
+	glm::vec3 rightVec;
+	glm::vec3 upVec;
+} camVecs;
+
+void initializeCam(){
+	cam.eyePos = glm::vec3(0.f, 5.f, -20.f); // x, y, z coordinates
+	cam.lookAt = glm::vec3(20.0f/* looking radius */, 0.f/* angle to z */, (M_PI/2) + 0.2/* angle to y */);
+	cam.upVec = glm::vec3(1.0f/* fixed length up radius*/, 0.f/* fixed angle to lookAt */, 0.f/* angle to up */);
+}
 
 // ObjParsers
 std::vector<object> objs;
@@ -44,6 +58,10 @@ void initialize() {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.f);
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_DEPTH_TEST);
+	initializeCam();
+	// std::cout << cam.lookAt.x*std::sin(cam.lookAt.y)*std::sin(cam.lookAt.z)+cam.eyePos.x << std::endl;
+	// std::cout << cam.lookAt.x*std::cos(cam.lookAt.z)+cam.eyePos.y << std::endl;
+	// std::cout << cam.lookAt.x*std::cos(cam.lookAt.y)*std::sin(cam.lookAt.z)+cam.eyePos.z << std::endl;
 }
 
 void resize(GLint _w, GLint _h) {
@@ -92,7 +110,16 @@ void draw(){
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(zoomer*std::sin(g_theta)*std::sin(up_angle), zoomer*std::cos(up_angle), -zoomer*std::cos(g_theta)*std::sin(up_angle), 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
+
+	// calculate camera vectors
+	camVecs.lookVec = glm::vec3(cam.lookAt.x*std::sin(cam.lookAt.y)*std::sin(cam.lookAt.z), cam.lookAt.x*std::cos(cam.lookAt.z), cam.lookAt.x*std::cos(cam.lookAt.y)*std::sin(cam.lookAt.z));
+	camVecs.rightVec = glm::normalize(glm::cross(camVecs.lookVec, glm::vec3(cam.upVec.x*std::sin(cam.upVec.z), cam.upVec.x*std::cos(cam.upVec.z), 0.f)));
+	camVecs.upVec = glm::normalize(glm::cross(camVecs.rightVec, camVecs.lookVec));
+	
+	gluLookAt(cam.eyePos.x, cam.eyePos.y, cam.eyePos.z, camVecs.lookVec.x+cam.eyePos.x, camVecs.lookVec.y+cam.eyePos.y, camVecs.lookVec.z+cam.eyePos.z, camVecs.upVec.x, camVecs.upVec.y, camVecs.upVec.z);
+	// gluLookAt(cam.eyePos.x, cam.eyePos.y, cam.eyePos.z, camVecs.lookVec.x, camVecs.lookVec.y, camVecs.lookVec.z, 0, 1, 0);
+
+
 
 	for (size_t i = 0; i < parsers.size(); i++){
 		glColor3f(objs[i].color.x, objs[i].color.y, objs[i].color.z);
@@ -120,16 +147,36 @@ void keyPressed(GLubyte _key, GLint _x, GLint _y) {
     	glutDestroyWindow(g_window);
     	g_window = 0;
     	break;
-	case 119:
-		zoomer -= 0.3;
+	case 119: // w
+		cam.eyePos.x += 0.5*std::sin(cam.lookAt.y)*std::sin(cam.lookAt.z);
+		cam.eyePos.y += 0.5*std::cos(cam.lookAt.z);
+		cam.eyePos.z += 0.5*std::cos(cam.lookAt.y)*std::sin(cam.lookAt.z);
 		break;
-	case 115:
-		zoomer += 0.3;
+	case 115: // s
+		cam.eyePos.x -= 0.5*std::sin(cam.lookAt.y)*std::sin(cam.lookAt.z);
+		cam.eyePos.y -= 0.5*std::cos(cam.lookAt.z);
+		cam.eyePos.z -= 0.5*std::cos(cam.lookAt.y)*std::sin(cam.lookAt.z);
 		break;
-	case 114:
+	case 97: //a
+		cam.eyePos.x += -0.5*camVecs.rightVec.x;
+		cam.eyePos.y += -0.5*camVecs.rightVec.y;
+		cam.eyePos.z += -0.5*camVecs.rightVec.z;
+		break;
+	case 100: //d
+		cam.eyePos.x -= -0.5*camVecs.rightVec.x;
+		cam.eyePos.y -= -0.5*camVecs.rightVec.y;
+		cam.eyePos.z -= -0.5*camVecs.rightVec.z;
+		break;
+	case 113: //q
+		cam.upVec.z += 0.02;
+		break;
+	case 101: //e
+		cam.upVec.z -= 0.02;
+		break;
+	case 114: // r
 		randomCol();
 		break;
-	case 100:
+	case 98: // b
 		for(size_t i = 0; i < objs.size(); i++){
 			objs[i].color = objs[i].DEFAULT_COLOR;
 		}
@@ -145,16 +192,18 @@ void specialKeyPressed(GLint _key, GLint _x, GLint _y) {
   	switch(_key) {
     	// Arrow keys
 		case GLUT_KEY_LEFT:
-			g_theta -= 0.02;
+			cam.lookAt.y += 0.02;
+			// std::cout << camVecs.upVec.x << " " << camVecs.upVec.y << " " << camVecs.upVec.z << std::endl;
 			break;
 		case GLUT_KEY_RIGHT:
-			g_theta += 0.02;
+			cam.lookAt.y -= 0.02;
+			// std::cout << camVecs.upVec.x << " " << camVecs.upVec.y << " " << camVecs.upVec.z << std::endl;
 			break;
 		case GLUT_KEY_UP:
-			up_angle -= 0.02;
+			cam.lookAt.z += 0.02;
 			break;
 		case GLUT_KEY_DOWN:
-			up_angle += 0.02;
+			cam.lookAt.z -= 0.02;
 			break;
 		// Unhandled
 		default:

@@ -1,5 +1,7 @@
 
 # This make only works on debian linux distribution. For mac and windows users, see ya.
+# To compile the program, just run make from terminal. To run the program, run make start, change the config file in CONF as you want.
+
 CC = g++ -std=c++17
 DEBUG = -g
 CFLAGS = -Wall -c $(DEBUG)
@@ -8,6 +10,7 @@ LIBS = -lglut -lGLU -lGL -lGLEW
 
 EXECUTABLE = mav
 OBJS = main.o ObjParser.o
+CONF = world.config
 
 $(EXECUTABLE): $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) $(LIBS) -o $(EXECUTABLE)
@@ -21,5 +24,5 @@ ObjParser.o: ObjParser.cpp ObjParser.h
 clean:
 	rm -f $(EXECUTABLE) $(OBJS)
 
-go:
-	./mav world.config
+start:
+	./mav $(CONF)
