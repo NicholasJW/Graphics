@@ -21,25 +21,25 @@ struct object{
 	glm::vec4 rotat;
 };
 
-// Camera
-// float g_theta{0.f}; //horizontal
-// float up_angle{1.57f};
-// float zoomer{20.f};
 struct camera{
 	glm::vec3 eyePos;
 	glm::vec3 lookAt; // this is centered at the eyeposition
 	glm::vec3 upVec;
-} cam;
+} cam; // Pameterize by user
 
 struct camVectors{
 	glm::vec3 lookVec;
 	glm::vec3 rightVec;
 	glm::vec3 upVec;
-} camVecs;
+} camVecs; // calculate by cam
+
+// Integer indicate which object to present
+int pre = -1;
+int angle = 0;
 
 void initializeCam(){
-	cam.eyePos = glm::vec3(0.f, 5.f, -20.f); // x, y, z coordinates
-	cam.lookAt = glm::vec3(20.0f/* looking radius */, 0.f/* angle to z */, (M_PI/2) + 0.2/* angle to y */);
+	cam.eyePos = glm::vec3(0.f, 2.f, 20.f); // x, y, z coordinates
+	cam.lookAt = glm::vec3(20.0f/* looking radius */, M_PI/* angle to z */, (M_PI/2) + 0.2/* angle to y */);
 	cam.upVec = glm::vec3(1.0f/* fixed length up radius*/, 0.f/* fixed angle to lookAt */, 0.f/* angle to up */);
 }
 
@@ -59,9 +59,6 @@ void initialize() {
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_DEPTH_TEST);
 	initializeCam();
-	// std::cout << cam.lookAt.x*std::sin(cam.lookAt.y)*std::sin(cam.lookAt.z)+cam.eyePos.x << std::endl;
-	// std::cout << cam.lookAt.x*std::cos(cam.lookAt.z)+cam.eyePos.y << std::endl;
-	// std::cout << cam.lookAt.x*std::cos(cam.lookAt.y)*std::sin(cam.lookAt.z)+cam.eyePos.z << std::endl;
 }
 
 void resize(GLint _w, GLint _h) {
@@ -117,15 +114,17 @@ void draw(){
 	camVecs.upVec = glm::normalize(glm::cross(camVecs.rightVec, camVecs.lookVec));
 	
 	gluLookAt(cam.eyePos.x, cam.eyePos.y, cam.eyePos.z, camVecs.lookVec.x+cam.eyePos.x, camVecs.lookVec.y+cam.eyePos.y, camVecs.lookVec.z+cam.eyePos.z, camVecs.upVec.x, camVecs.upVec.y, camVecs.upVec.z);
-	// gluLookAt(cam.eyePos.x, cam.eyePos.y, cam.eyePos.z, camVecs.lookVec.x, camVecs.lookVec.y, camVecs.lookVec.z, 0, 1, 0);
 
-
-
+	// Drawing
 	for (size_t i = 0; i < parsers.size(); i++){
 		glColor3f(objs[i].color.x, objs[i].color.y, objs[i].color.z);
 		glPushMatrix();
 		glTranslatef(objs[i].trans.x, objs[i].trans.y, objs[i].trans.z);
 		glRotatef(objs[i].rotat.x, objs[i].rotat.y, objs[i].rotat.z, objs[i].rotat.w);
+		if (pre == static_cast<int>(i)){
+			angle++;
+			glRotatef((angle)%360, 0.0f, 1.0f, 0.0f);	
+		}
 		glScalef(objs[i].scale.x, objs[i].scale.y, objs[i].scale.z);
 		parsers[i].drawObj();
 		glPopMatrix();
@@ -148,24 +147,24 @@ void keyPressed(GLubyte _key, GLint _x, GLint _y) {
     	g_window = 0;
     	break;
 	case 119: // w
-		cam.eyePos.x += 0.5*std::sin(cam.lookAt.y)*std::sin(cam.lookAt.z);
-		cam.eyePos.y += 0.5*std::cos(cam.lookAt.z);
-		cam.eyePos.z += 0.5*std::cos(cam.lookAt.y)*std::sin(cam.lookAt.z);
+		cam.eyePos.x += 0.02*camVecs.lookVec.x;
+		cam.eyePos.y += 0.02*camVecs.lookVec.y;
+		cam.eyePos.z += 0.02*camVecs.lookVec.z;
 		break;
 	case 115: // s
-		cam.eyePos.x -= 0.5*std::sin(cam.lookAt.y)*std::sin(cam.lookAt.z);
-		cam.eyePos.y -= 0.5*std::cos(cam.lookAt.z);
-		cam.eyePos.z -= 0.5*std::cos(cam.lookAt.y)*std::sin(cam.lookAt.z);
+		cam.eyePos.x -= 0.02*camVecs.lookVec.x;
+		cam.eyePos.y -= 0.02*camVecs.lookVec.y;
+		cam.eyePos.z -= 0.02*camVecs.lookVec.z;
 		break;
 	case 97: //a
-		cam.eyePos.x += -0.5*camVecs.rightVec.x;
-		cam.eyePos.y += -0.5*camVecs.rightVec.y;
-		cam.eyePos.z += -0.5*camVecs.rightVec.z;
+		cam.eyePos.x += -0.2*camVecs.rightVec.x;
+		cam.eyePos.y += -0.2*camVecs.rightVec.y;
+		cam.eyePos.z += -0.2*camVecs.rightVec.z;
 		break;
 	case 100: //d
-		cam.eyePos.x -= -0.5*camVecs.rightVec.x;
-		cam.eyePos.y -= -0.5*camVecs.rightVec.y;
-		cam.eyePos.z -= -0.5*camVecs.rightVec.z;
+		cam.eyePos.x -= -0.2*camVecs.rightVec.x;
+		cam.eyePos.y -= -0.2*camVecs.rightVec.y;
+		cam.eyePos.z -= -0.2*camVecs.rightVec.z;
 		break;
 	case 113: //q
 		cam.upVec.z += 0.02;
@@ -181,6 +180,22 @@ void keyPressed(GLubyte _key, GLint _x, GLint _y) {
 			objs[i].color = objs[i].DEFAULT_COLOR;
 		}
 		break;
+	case 49:
+		pre = 0;
+		angle = 0;
+		break;
+	case 50:
+		pre = 1;
+		angle = 0;
+		break;
+	case 51:
+		pre = 2;
+		angle = 0;
+		break;
+	case 48:
+		pre = -1;
+		angle = 0;
+		break;
     // Unhandled
     default:
     	std::cout << "Unhandled key: " << (int)(_key) << std::endl;
@@ -193,11 +208,9 @@ void specialKeyPressed(GLint _key, GLint _x, GLint _y) {
     	// Arrow keys
 		case GLUT_KEY_LEFT:
 			cam.lookAt.y += 0.02;
-			// std::cout << camVecs.upVec.x << " " << camVecs.upVec.y << " " << camVecs.upVec.z << std::endl;
 			break;
 		case GLUT_KEY_RIGHT:
 			cam.lookAt.y -= 0.02;
-			// std::cout << camVecs.upVec.x << " " << camVecs.upVec.y << " " << camVecs.upVec.z << std::endl;
 			break;
 		case GLUT_KEY_UP:
 			cam.lookAt.z += 0.02;
