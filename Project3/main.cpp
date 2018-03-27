@@ -39,8 +39,8 @@ int pre = -1;
 int angle = 0;
 
 void initializeCam(){
-	cam.eyePos = glm::vec3(0.f, 2.f, 20.f); // x, y, z coordinates
-	cam.lookAt = glm::vec3(20.0f/* looking radius */, M_PI/* angle to z */, (M_PI/2) + 0.2/* angle to y */);
+	cam.eyePos = glm::vec3(0.f, 0.f, 20.f); // x, y, z coordinates
+	cam.lookAt = glm::vec3(20.0f/* looking radius */, M_PI/* angle to z */, (M_PI/2)/* angle to y */);
 	cam.upVec = glm::vec3(1.0f/* fixed length up radius*/, 0.f/* fixed angle to lookAt */, 0.f/* angle to up */);
 }
 
@@ -146,6 +146,7 @@ void draw(){
 	g_frameRate = duration_cast<duration<float>>(time - g_frameTime).count();
 	g_frameTime = time;
 	g_framesPerSecond = 1.f/(g_delay + g_frameRate);
+	// printf("FPS: %6.2f\n", g_framesPerSecond);
 }
 
 void keyPressed(GLubyte _key, GLint _x, GLint _y) {
@@ -155,6 +156,8 @@ void keyPressed(GLubyte _key, GLint _x, GLint _y) {
     	std::cout << "Destroying window: " << g_window << std::endl;
     	glutDestroyWindow(g_window);
     	g_window = 0;
+		if(isPs)
+			delete(ps);
     	break;
 	case 119: // w
 		cam.eyePos.x += 0.02*camVecs.lookVec.x;
@@ -286,30 +289,65 @@ void parseConfig(std::string path){
 			ss.str("");
 			objs.push_back(co);
 		}else if (line == "Particle:"){
+			// cout << "Start parsing parti sys." << endl;
 			isPs = true;
 			ps = new ParticleSystem();
 			int maxN;
 			float mass;
+			float timeStamp;
 			while(getline(infile, line)){
 				if (line[0] == '#')
 					continue;
 				if(line == "EndParticle;"){
-					break;
 					ps->setMaxNum(maxN);
 					ps->setMass(mass);
+					ps->setTime(timeStamp);
 					ps->initializeParticles();
+					break;
 				}
 				else if(line.substr(0,9) == "maxNum = "){
 					maxN = std::atoi(line.substr(9).c_str());
 				}else if(line.substr(0,7) == "mass = "){
 					mass = std::atof(line.substr(7).c_str());
-				}else if(line.substr(0.2) == "f "){
+				}else if(line.substr(0,9) == "timeStamp"){
+					timeStamp = std::atof(line.substr(12).c_str());
+				}
+				else if(line[0] == 'f'){
+					// std::cout<< "forces" << std::endl;
 					istringstream ss(line.substr(2));
 					float x, y, z;
 					ss >> x;
 					ss >> y;
 					ss >> z;
 					ps -> forces.push_back(glm::vec3(x, y, z));
+				}else if(line[0] == 'g'){
+					// std::cout<< "forces" << std::endl;
+					istringstream ss(line.substr(2));
+					float x, y, z, r;
+					ss >> x;
+					ss >> y;
+					ss >> z;
+					ss >> r;
+					ps -> generators.push_back(glm::vec4(x, y, z, r));
+				}else if(line[0] == 'a'){
+					// std::cout<< "attractors" << std::endl;
+					istringstream ss(line.substr(2));
+					float x, y, z, r;
+					ss >> x;
+					ss >> y;
+					ss >> z;
+					ss >> r;
+					// cout << r << endl;
+					ps -> attractors.push_back(glm::vec4(x, y, z, r));
+				}else if(line[0] == 'r'){
+					// std::cout<< "repulsers" << std::endl;
+					istringstream ss(line.substr(2));
+					float x, y, z, r;
+					ss >> x;
+					ss >> y;
+					ss >> z;
+					ss >> r;
+					ps -> repulsers.push_back(glm::vec4(x, y, z, r));
 				}
 			}
 		}

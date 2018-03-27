@@ -16,33 +16,39 @@
 class ParticleSystem{
 private:
     float ptMass;
+    float period;
     glm::vec3 acceleration;
-    // Record current time
-    std::chrono::high_resolution_clock::time_point cTime;
 
     struct Particle{
 	    glm::vec3 pos;
 	    glm::vec3 vel;
 	    glm::vec3 col;
+        glm::vec3 acc;
     };
     int maxNumParts;
     std::vector<Particle> parts;
     
     // Random float from 0 to 10
     float randomStart() {
-	    return (float) (rand() / ((float)RAND_MAX + 1))*10;
+	    return (float) (rand() / ((float)RAND_MAX))*10;
     };
 
     // glm::vec3 getVelo();
-    void getNewAcce();
+    void getNewAcce(Particle &p);
+    bool checkPos(Particle p);
 
 public:
     std::vector<glm::vec3> forces;
+    std::vector<glm::vec4> attractors;
+    std::vector<glm::vec4> repulsers;
+    std::vector<glm::vec4> generators;
+    
     ParticleSystem(){};
     ParticleSystem(int _maxNumParts, float _mass, std::vector<glm::vec3> _forces);
 
     void setMaxNum(int _maxNumParts){ maxNumParts = _maxNumParts;};
-    void setMass(int _mass){ ptMass = _mass;};
+    void setMass(float _mass){ ptMass = _mass;};
+    void setTime(float _time){ period = _time;};
     void initializeParticles();
     void draw();
     void update();
