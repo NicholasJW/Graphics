@@ -14,9 +14,16 @@ void ParticleSystem::initializeParticles(){
     for(int i=0; i<maxNumParts; i++){
         Particle p;
         // Raodomize color
-        p.col.x = (float) rand() / (RAND_MAX);
-        p.col.y = (float) rand() / (RAND_MAX);
-        p.col.z = (float) rand() / (RAND_MAX);
+        if(useCol){
+            p.col.x = color.x;
+            p.col.y = color.y;
+            p.col.z = color.z;
+        }else{
+            p.col.x = (float) rand() / (RAND_MAX);
+            p.col.y = (float) rand() / (RAND_MAX);
+            p.col.z = (float) rand() / (RAND_MAX);
+        }
+        
         p.pos = glm::vec3(randomStart()-5, randomStart()-5, randomStart()-5);
         p.vel = glm::vec3(0.f, 0.f, 0.f);
         parts.push_back(p);
@@ -60,6 +67,9 @@ void ParticleSystem::getNewAcce(Particle &p){
         sumForce.z -= force*dirVec.z;
     }
 
+    sumForce.y -= ef.gravity;
+    sumForce.x += ef.hWind;
+
     p.acc.x = sumForce.x/ptMass;
     p.acc.y = sumForce.y/ptMass;
     p.acc.z = sumForce.z/ptMass;
@@ -88,17 +98,24 @@ void ParticleSystem::update(){
         if(!checkPos(parts[i])){
             Particle p;
             // Raodomize color
-            p.col.x = (float) rand() / (RAND_MAX);
-            p.col.y = (float) rand() / (RAND_MAX);
-            p.col.z = (float) rand() / (RAND_MAX);
+            if(useCol){
+                p.col.x = color.x;
+                p.col.y = color.y;
+                p.col.z = color.z;
+            }else{
+                p.col.x = (float) rand() / (RAND_MAX);
+                p.col.y = (float) rand() / (RAND_MAX);
+                p.col.z = (float) rand() / (RAND_MAX);
+            }
             // p.pos = glm::vec3(randomStart()-5, randomStart()-5, randomStart()-5);
             int index = (rand() % static_cast<int>(generators.size()));
-            std::cout << index << std::endl;
+            // std::cout << index << std::endl;
             p.pos = glm::vec3(generators[index].x, generators[index].y, generators[index].z);
             glm::vec3 goTo = glm::vec3(randomStart()-5, randomStart()-5, randomStart()-5);
-            p.vel.x = generators[index].w*(goTo.x-p.pos.x);
-            p.vel.y = generators[index].w*(goTo.y-p.pos.y);
-            p.vel.z = generators[index].w*(goTo.z-p.pos.z);
+            // generators[index].w += ef.gSpeed;
+            p.vel.x = (generators[index].w+ef.gSpeed)*(goTo.x-p.pos.x);
+            p.vel.y = (generators[index].w+ef.gSpeed)*(goTo.y-p.pos.y);
+            p.vel.z = (generators[index].w+ef.gSpeed)*(goTo.z-p.pos.z);
             p.acc.x = 0.f;
             p.acc.y = 0.f;
             p.acc.z = 0.f;

@@ -209,6 +209,24 @@ void keyPressed(GLubyte _key, GLint _x, GLint _y) {
 		pre = -1;
 		angle = 0;
 		break;
+	case 105:
+		ps->ef.gravity -= 0.1;
+		break;
+	case 107:
+		ps->ef.gravity += 0.1;
+		break;
+	case 106:
+		ps->ef.hWind -= 0.1;
+		break;
+	case 108:
+		ps->ef.hWind += 0.1;
+		break;
+	case 43:
+		ps->ef.gSpeed += 0.01;
+		break;
+	case 95:
+		ps->ef.gSpeed -= 0.01;
+		break;
     // Unhandled
     default:
     	std::cout << "Unhandled key: " << (int)(_key) << std::endl;
@@ -320,6 +338,15 @@ void parseConfig(std::string path){
 					ss >> y;
 					ss >> z;
 					ps -> forces.push_back(glm::vec3(x, y, z));
+				}else if(line[0] == 'c'){
+					// std::cout<< "forces" << std::endl;
+					istringstream ss(line.substr(2));
+					float x, y, z;
+					ss >> x;
+					ss >> y;
+					ss >> z;
+					ps -> useCol = true;
+					ps -> color = glm::vec3(x, y, z);
 				}else if(line[0] == 'g'){
 					// std::cout<< "forces" << std::endl;
 					istringstream ss(line.substr(2));

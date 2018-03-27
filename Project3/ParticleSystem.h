@@ -17,8 +17,13 @@ class ParticleSystem{
 private:
     float ptMass;
     float period;
-    glm::vec3 acceleration;
-
+    struct ExtraForce{
+        float gravity = 0;
+        float hWind = 0;
+        float gSpeed = 0;
+    };
+    
+    // glm::vec3 acceleration;
     struct Particle{
 	    glm::vec3 pos;
 	    glm::vec3 vel;
@@ -38,6 +43,8 @@ private:
     bool checkPos(Particle p);
 
 public:
+    bool useCol = false;
+    glm::vec3 color;
     std::vector<glm::vec3> forces;
     std::vector<glm::vec4> attractors;
     std::vector<glm::vec4> repulsers;
@@ -52,7 +59,7 @@ public:
     void initializeParticles();
     void draw();
     void update();
-
+    ExtraForce ef;
 
 };
 
