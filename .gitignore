@@ -3,7 +3,8 @@
 Dependencies
 
 #Visual Studio Code folder
-.vscode
+prog00/.vscode
+/.vscode
 
 #Tutorials
 /Tutorial 0.3.8
