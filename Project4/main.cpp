@@ -39,8 +39,8 @@ int pre = -1;
 int angle = 0;
 
 void initializeCam(){
-	cam.eyePos = glm::vec3(0.f, 0.f, 20.f); // x, y, z coordinates
-	cam.lookAt = glm::vec3(20.0f/* looking radius */, M_PI/* angle to z */, (M_PI/2)/* angle to y */);
+	cam.eyePos = glm::vec3(0.f, 0.f, -20.f); // x, y, z coordinates
+	cam.lookAt = glm::vec3(20.0f/* looking radius */, 0/* angle to z */, (M_PI/2)/* angle to y */);
 	cam.upVec = glm::vec3(1.0f/* fixed length up radius*/, 0.f/* fixed angle to lookAt */, 0.f/* angle to up */);
 }
 
@@ -96,43 +96,94 @@ void randomCol(){
 	}
 }
 
-void PointLight(const float x, const float y, const float z, const float amb, const float diff, const float spec){
-	glEnable(GL_LIGHTING);
+void applyLight(){
 	
-	/*
-	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
-	GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
-	GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-	*/
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 
-	GLfloat light_ambient[] = { amb,amb,amb, 1.0 };
-	GLfloat light_diffuse[] = {diff, diff, diff, 1.0 };
-	GLfloat light_specular[] = {spec, spec, spec, 1.0 };
+	glEnable(GL_LIGHTING);
+	// Directional grey light
+	// Facing negative-y axis
+	GLfloat light0_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat light0_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat light0_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat light0_position[] = { 0, 0, -1, 0.0 };
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_diffuse);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
+	glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
 	
-	GLfloat light_position[] = {x,y,z, 0.0 };
+	glEnable(GL_LIGHT0);
 	
-	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	// Spot light
+	GLfloat light1_diffuse[] = {0, 0, 1, 1};
+	GLfloat light1_specular[] = {0, 0, 1, 1};
+	GLfloat spot_direction[] = {0.0, -1.0, 0.0};
+
+	GLfloat light1_position[] = { 0, 7, 0, 1.0 };
+	// glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, light1_specular);
+	glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, light1_diffuse);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 45.0);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
+
+	// glEnable(GL_LIGHT1);
+}
+
+void drawAxies(){
+	glColor3f(1.0,1.0,1.0);
+	glLineWidth(5.0);
 	
-	glEnable(GL_LIGHT0); //enable the light after setting the properties
+    glBegin(GL_LINES);
+    // x aix
  
+    glVertex3f(-4.0, 0.0f, 0.0f);
+    glVertex3f(4.0, 0.0f, 0.0f);
+ 
+    // arrow
+    glVertex3f(4.0, 0.0f, 0.0f);
+    glVertex3f(3.0, 1.0f, 0.0f);
+ 
+    glVertex3f(4.0, 0.0f, 0.0f);
+    glVertex3f(3.0, -1.0f, 0.0f);
+    glEnd();
+ 
+    // y 
+    glBegin(GL_LINES);
+    glVertex3f(0.0, -4.0f, 0.0f);
+    glVertex3f(0.0, 4.0f, 0.0f);
+ 
+    // arrow
+    glVertex3f(0.0, 4.0f, 0.0f);
+    glVertex3f(1.0, 3.0f, 0.0f);
+ 
+    glVertex3f(0.0, 4.0f, 0.0f);
+    glVertex3f(-1.0, 3.0f, 0.0f);
+    glEnd();
+
+    // z 
+    glBegin(GL_LINES);
+    glVertex3f(0.0, 0.0f ,-4.0f );
+    glVertex3f(0.0, 0.0f ,4.0f );
+ 
+    // arrow
+    glVertex3f(0.0, 0.0f ,4.0f );
+    glVertex3f(0.0, 1.0f ,3.0f );
+ 
+    glVertex3f(0.0, 0.0f ,4.0f );
+    glVertex3f(0.0, -1.0f ,3.0f );
+    glEnd();
+
 }
 
 void draw(){
 	using namespace std::chrono;
 	// std::cout << "Start drawing" << std::endl;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	applyLight();
+	drawAxies();
 
-	// static GLfloat lightPosition[] = { 0.5f, 1.0f, 1.5f, 0.0f };
-	// static GLfloat whiteLight[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-	// static GLfloat darkLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-	// glEnable(GL_LIGHTING);
-	// glEnable(GL_LIGHT0);
-	// glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-	// glLightfv(GL_LIGHT0, GL_AMBIENT, darkLight);
-	// glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteLight);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -440,7 +491,6 @@ int main(int argc, char* argv[]){
 	glutKeyboardFunc(keyPressed);
 	glutSpecialFunc(specialKeyPressed);
 	glutTimerFunc(1000/FPS, timer, 0);
-	// PointLight(0, 0, 50, 0, 1, 1);
 
 	std::cout << "Start rendering" << std::endl;
 	// Go to main loop
