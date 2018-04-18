@@ -96,39 +96,75 @@ void randomCol(){
 	}
 }
 
+void drawSphere(float x, float y, float z){
+	glPushMatrix();
+	glTranslatef(x, y, z);
+	glutSolidSphere(0.5f, 20, 20);
+	glPopMatrix();
+}
+
 void applyLight(){
 	
-	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
-
+	// glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+	glEnable(GL_LIGHT2);
+	glEnable(GL_LIGHT3);
 	// Directional grey light
 	// Facing negative-y axis
 	GLfloat light0_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
-	GLfloat light0_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
-	GLfloat light0_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-	GLfloat light0_position[] = { 0, 0, -1, 0.0 };
-
+	GLfloat light0_diffuse[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat light0_specular[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat light0_position[] = { 0.0, 1.0, 0.0, 0.0 };
 	glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
+	glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_diffuse);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
-	glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
 	
-	glEnable(GL_LIGHT0);
-	
-	// Spot light
-	GLfloat light1_diffuse[] = {0, 0, 1, 1};
-	GLfloat light1_specular[] = {0, 0, 1, 1};
-	GLfloat spot_direction[] = {0.0, -1.0, 0.0};
-
-	GLfloat light1_position[] = { 0, 7, 0, 1.0 };
-	// glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
+	// Spot light 1
+	GLfloat light1_diffuse[] = {1.f, 0.f, 0.f, 1.f};
+	GLfloat light1_specular[] = {1.f, 0.f, 0.f, 1.f};
+	GLfloat spot1_direction[] = {-0.5f, -1.f, 0.f};
+	GLfloat light1_position[] = {5.f, 10.f, 0.f, 1.0f};
+	drawSphere(5, 10, 0);
 	glLightfv(GL_LIGHT1, GL_SPECULAR, light1_specular);
 	glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
-	glLightfv(GL_LIGHT1, GL_SPECULAR, light1_diffuse);
-	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 45.0);
-	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, light1_diffuse);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 30.f);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot1_direction);
+	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.5);
 
-	// glEnable(GL_LIGHT1);
+	// Spot light 2
+	GLfloat light2_diffuse[] = {0.f, 0.f, 1.f, 1.f};
+	GLfloat light2_specular[] = {0.f, 0.f, 1.f, 1.f};
+	GLfloat spot2_direction[] = {0.5f, -1.f, 0.f};
+	GLfloat light2_position[] = {-5.f, 10.f, 0.f, 1.0f};
+	drawSphere(-5, 10, 0);
+	glLightfv(GL_LIGHT2, GL_SPECULAR, light2_specular);
+	glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, light2_diffuse);
+	glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 30.f);
+	glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, spot2_direction);
+	glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.5);
+
+
+	// Point Light
+	GLfloat light3_diffuse[] = {1.f, 1.f, 1.f, 1.f};
+	GLfloat light3_specular[] = {1.f, 1.f, 1.f, 1.f};
+	GLfloat light3_position[] = {0.1, 3, 1.5, 1.0};
+	// drawSphere(0.1, 3, 1.5);
+	glLightfv(GL_LIGHT3, GL_SPECULAR, light3_specular);
+	glLightfv(GL_LIGHT3, GL_POSITION, light3_position);
+	glLightfv(GL_LIGHT3, GL_DIFFUSE, light3_diffuse);
+	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 3.0);
+	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT3, GL_QUADRATIC_ATTENUATION, 0.5);
+
 }
 
 void drawAxies(){
@@ -181,9 +217,6 @@ void draw(){
 	using namespace std::chrono;
 	// std::cout << "Start drawing" << std::endl;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	applyLight();
-	drawAxies();
-
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -195,6 +228,9 @@ void draw(){
 	
 	gluLookAt(cam.eyePos.x, cam.eyePos.y, cam.eyePos.z, camVecs.lookVec.x+cam.eyePos.x, camVecs.lookVec.y+cam.eyePos.y, camVecs.lookVec.z+cam.eyePos.z, camVecs.upVec.x, camVecs.upVec.y, camVecs.upVec.z);
 
+	applyLight();
+	// drawAxies();
+	// drawSphere();
 	// Drawing
 	for (size_t i = 0; i < parsers.size(); i++){
 		glColor3f(objs[i].color.x, objs[i].color.y, objs[i].color.z);

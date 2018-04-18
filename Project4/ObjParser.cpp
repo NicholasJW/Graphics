@@ -17,9 +17,6 @@ ObjParser::ObjParser(std::string path){
             istringstream vs(line.substr(2));
             glm::vec3 vert;
             vs>>x; vs>>y; vs>>z;
-            // x = x/30;
-            // y = y/30;
-            // z = z/30;
             vert = glm::vec3(x, y, z);
             vertices.push_back(vert);
         }else if (line.substr(0,3) == "vn "){
@@ -81,13 +78,13 @@ void ObjParser::drawObj(){
     glBegin(GL_TRIANGLES);
     for(unsigned int i = 0; i < faces.size(); i++){        
         // First point
-        glNormal3f(normals[faces[i].v1.nIndex].x, normals[faces[i].v1.nIndex].x, normals[faces[i].v1.nIndex].x);
+        glNormal3f(normals[faces[i].v1.nIndex].x, normals[faces[i].v1.nIndex].y, normals[faces[i].v1.nIndex].z);
         glVertex3f(vertices[faces[i].v1.vIndex].x, vertices[faces[i].v1.vIndex].y, vertices[faces[i].v1.vIndex].z);
         // Second point
-        glNormal3f(normals[faces[i].v2.nIndex].x, normals[faces[i].v2.nIndex].x, normals[faces[i].v2.nIndex].x);
+        glNormal3f(normals[faces[i].v2.nIndex].x, normals[faces[i].v2.nIndex].y, normals[faces[i].v2.nIndex].z);
         glVertex3f(vertices[faces[i].v2.vIndex].x, vertices[faces[i].v2.vIndex].y, vertices[faces[i].v2.vIndex].z);
         // Third point
-        glNormal3f(normals[faces[i].v3.nIndex].x, normals[faces[i].v3.nIndex].x, normals[faces[i].v3.nIndex].x);
+        glNormal3f(normals[faces[i].v3.nIndex].x, normals[faces[i].v3.nIndex].y, normals[faces[i].v3.nIndex].z);
         glVertex3f(vertices[faces[i].v3.vIndex].x, vertices[faces[i].v3.vIndex].y, vertices[faces[i].v3.vIndex].z);
 
     }
