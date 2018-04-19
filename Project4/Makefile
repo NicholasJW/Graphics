@@ -9,7 +9,7 @@ LFLAGS = -Wall $(DEBUG)
 LIBS = -lglut -lGLU -lGL -lGLEW
 
 EXECUTABLE = mav
-OBJS = main.o ObjParser.o ParticleSystem.o
+OBJS = main.o ObjParser.o ParticleSystem.o MtlParser.o
 CONF = world.config
 
 $(EXECUTABLE): $(OBJS)
@@ -21,8 +21,11 @@ main.o: main.cpp ObjParser.o ParticleSystem.o
 ObjParser.o: ObjParser.cpp ObjParser.h
 	$(CC) $(CFLAGS) $(LIBS) ObjParser.cpp
 
-ParticleSystem.o: ParticleSystem.cpp ParticleSystem.h
+ParticleSystem.o: ParticleSystem.cpp ParticleSystem.h MtlParser.o
 	$(CC) $(CFLAGS) $(LIBS) ParticleSystem.cpp
+
+MtlParser.o: MtlParser.cpp MtlParser.h
+	$(CC) $(CFLAGS) $(LIBS) MtlParser.cpp
 
 clean:
 	rm -f $(EXECUTABLE) $(OBJS)

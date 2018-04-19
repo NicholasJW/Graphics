@@ -99,7 +99,7 @@ void randomCol(){
 void drawSphere(float x, float y, float z){
 	glPushMatrix();
 	glTranslatef(x, y, z);
-	glutSolidSphere(0.5f, 20, 20);
+	glutSolidSphere(0.1f, 20, 20);
 	glPopMatrix();
 }
 
@@ -111,6 +111,9 @@ void applyLight(){
 	glEnable(GL_LIGHT1);
 	glEnable(GL_LIGHT2);
 	glEnable(GL_LIGHT3);
+	glEnable(GL_LIGHT4);
+	glEnable(GL_LIGHT5);	
+
 	// Directional grey light
 	// Facing negative-y axis
 	GLfloat light0_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
@@ -152,7 +155,6 @@ void applyLight(){
 	glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 1.0);
 	glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.5);
 
-
 	// Point Light
 	GLfloat light3_diffuse[] = {1.f, 1.f, 1.f, 1.f};
 	GLfloat light3_specular[] = {1.f, 1.f, 1.f, 1.f};
@@ -165,6 +167,35 @@ void applyLight(){
 	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 1.0);
 	glLightf(GL_LIGHT3, GL_QUADRATIC_ATTENUATION, 0.5);
 
+	// Spot light 4
+	GLfloat light4_diffuse[] = {0.0f, 1.f, 0.0f, 1.f};
+	GLfloat light4_specular[] = {0.0f, 1.f, 0.3f, 1.f};
+	GLfloat spot4_direction[] = {0.0f, 0.0f, -1.0f};
+	GLfloat light4_position[] = {0.1f, 0.f, 30.f, 1.0f};
+	drawSphere(0, 0, 30);
+	glLightfv(GL_LIGHT4, GL_SPECULAR, light4_specular);
+	glLightfv(GL_LIGHT4, GL_POSITION, light4_position);
+	glLightfv(GL_LIGHT4, GL_DIFFUSE, light4_diffuse);
+	glLightf(GL_LIGHT4, GL_SPOT_CUTOFF, 15.f);
+	glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot4_direction);
+	glLightf(GL_LIGHT4, GL_CONSTANT_ATTENUATION, 2);
+	glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT4, GL_QUADRATIC_ATTENUATION, 0.5);
+
+	// Spot light 5
+	GLfloat light5_diffuse[] = {1.f, 1.f, 0.f, 1.f};
+	GLfloat light5_specular[] = {1.f, 1.f, 0.f, 1.f};
+	GLfloat spot5_direction[] = {0.f, 5.f, 3.f};
+	GLfloat light5_position[] = {0.1f, -5.f, -3.f, 1.0f};
+	drawSphere(0.1, -5, -3);
+	glLightfv(GL_LIGHT5, GL_SPECULAR, light5_specular);
+	glLightfv(GL_LIGHT5, GL_POSITION, light5_position);
+	glLightfv(GL_LIGHT5, GL_DIFFUSE, light5_diffuse);
+	glLightf(GL_LIGHT5, GL_SPOT_CUTOFF, 60.f);
+	glLightfv(GL_LIGHT5, GL_SPOT_DIRECTION, spot5_direction);
+	glLightf(GL_LIGHT5, GL_CONSTANT_ATTENUATION, 3.0);
+	glLightf(GL_LIGHT5, GL_QUADRATIC_ATTENUATION, 1.5);
+	glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, 3.0);
 }
 
 void drawAxies(){
@@ -244,6 +275,7 @@ void draw(){
 		glScalef(objs[i].scale.x, objs[i].scale.y, objs[i].scale.z);
 		parsers[i].drawObj();
 		glPopMatrix();
+		parsers[i].applyMtl();
 	}
 
 	// Particle System

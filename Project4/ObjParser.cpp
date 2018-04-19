@@ -12,7 +12,11 @@ ObjParser::ObjParser(std::string path){
     string line;
 
     while(getline(infile, line)){
-		if (line.substr(0,2) == "v "){
+		if(line[0]=='#'){
+            continue;
+        }
+        
+        if (line.substr(0,2) == "v "){
             float x,y,z;
             istringstream vs(line.substr(2));
             glm::vec3 vert;
@@ -66,9 +70,14 @@ ObjParser::ObjParser(std::string path){
             }
             ss.clear();
             faces.push_back(cf);
+        }else if(line.substr(0, 7) == "mtllib "){
+            mtlInfo.first = line.substr(7);
+        }else if(line.substr(0, 7) == "usemtl "){
+            mtlInfo.second = line.substr(7);
         }
 	}
 
+    mp = new MtlParser(mtlInfo.first, mtlInfo.second);
     infile.close();
 
 }

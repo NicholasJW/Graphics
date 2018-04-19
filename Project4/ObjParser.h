@@ -1,16 +1,8 @@
 #ifndef __OBJPARSER_H__
 #define __OBJPARSER_H__
-// GLM
-#include <GL/glut.h>
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
 
-// STL
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-
+// MTL Parser
+#include "MtlParser.h"
 class ObjParser{
 
 public:
@@ -19,6 +11,7 @@ public:
     ~ObjParser(){};
 
     void drawObj();
+    void applyMtl(){mp->applyMaterial();};
     // float getVertexMult(){return vertexMult;};
     // void setVertexMult(float x){vertexMult = x;};
 
@@ -39,7 +32,8 @@ private:
     std::vector< glm::vec3 > texts;
     std::vector< glm::vec3 > normals;
     std::vector< face > faces;
-
+    std::pair<std::string, std::string> mtlInfo = {"", ""};
+    MtlParser* mp;
 };
 
 #endif
