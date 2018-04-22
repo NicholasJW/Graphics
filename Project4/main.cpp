@@ -1,3 +1,5 @@
+// I received help from Tianchang Yang on this project
+
 // STL
 #include <cmath>
 #include <chrono>
@@ -7,6 +9,7 @@
 #include <GL/glut.h>
 #include "ObjParser.h"
 #include "ParticleSystem.h"
+#include "FreeImage.h"
 
 // Winodw
 int g_width{1360};
@@ -52,12 +55,75 @@ std::vector<ObjParser> parsers;
 bool isPs = false;
 ParticleSystem *ps;
 
+// Textures
+// texture width and height
+GLint width, height;
+GLuint tex1, tex2;
+
 // Frame rate
 const unsigned int FPS = 60;
 float g_frameRate{0.f};
 std::chrono::high_resolution_clock::time_point g_frameTime{std::chrono::high_resolution_clock::now()};
 float g_delay{0.f};
 float g_framesPerSecond{0.f};
+
+
+// load image
+unsigned char* imgBuffer;
+
+static bool loadImage(const char* fname)
+{
+    FreeImage_Initialise(TRUE);
+
+    // unknown format
+    FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
+
+    // get format
+    fif = FreeImage_GetFileType(fname, 0);
+
+    // read image
+    FIBITMAP* bitmap = FreeImage_Load(fif, fname, 0);
+
+    if (!bitmap)
+    {
+        std::cout << "Load Error!" << std::endl;
+        return false;
+    }
+
+    int x, y;
+    RGBQUAD m_rgb;
+
+    // get width and height
+    width = (GLint)FreeImage_GetWidth(bitmap);
+    height = (GLint)FreeImage_GetHeight(bitmap);
+
+    imgBuffer = new unsigned char[width * height * 4];
+
+    // get RGB values
+    for (y = 0; y < height; ++y)
+    {
+        for (x = 0; x < width; ++x)
+        {
+            // get pixel
+            FreeImage_GetPixelColor(bitmap, x, y, &m_rgb);
+
+            // save RGB value into image buffer
+            imgBuffer[y * width * 4 + x * 4 + 0] = m_rgb.rgbRed;
+            imgBuffer[y * width * 4 + x * 4 + 1] = m_rgb.rgbGreen;
+            imgBuffer[y * width * 4 + x * 4 + 2] = m_rgb.rgbBlue;
+
+            // get alpha value
+            if (FreeImage_IsTransparent(bitmap))
+                imgBuffer[y * width * 4 + x * 4 + 3] = m_rgb.rgbReserved;
+            else
+                imgBuffer[y * width * 4 + x * 4 + 3] = 255;
+        }
+    }
+    // free memory
+    FreeImage_Unload(bitmap);
+    return true;
+}
+
 
 void initialize() {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.f);
@@ -105,15 +171,17 @@ void drawSphere(float x, float y, float z){
 
 void applyLight(){
 	
+	glDisable(GL_LIGHTING);
 	// glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	// glEnable(GL_LIGHT1);
-	// glEnable(GL_LIGHT2);
+	// glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+	glEnable(GL_LIGHT2);
 	// glEnable(GL_LIGHT3);
-	// glEnable(GL_LIGHT4);
-	// glEnable(GL_LIGHT5);
+	glEnable(GL_LIGHT4);
+	glEnable(GL_LIGHT5);
 	// glEnable(GL_LIGHT6);	
+	glEnable(GL_LIGHT7);
 
 	// Directional grey light
 	// Facing negative-y axis
@@ -127,8 +195,8 @@ void applyLight(){
 	glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
 	
 	// Spot light 1
-	GLfloat light1_diffuse[] = {1.f, 0.f, 0.f, 1.f};
-	GLfloat light1_specular[] = {1.f, 0.f, 0.f, 1.f};
+	GLfloat light1_diffuse[] = {1.f, 1.f, 1.f, 1.f};
+	GLfloat light1_specular[] = {1.f, 1.f, 1.f, 1.f};
 	GLfloat spot1_direction[] = {-0.5f, -1.f, 0.f};
 	GLfloat light1_position[] = {5.f, 10.f, 0.f, 1.0f};
 	drawSphere(5, 10, 0);
@@ -142,8 +210,8 @@ void applyLight(){
 	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.5);
 
 	// Spot light 2
-	GLfloat light2_diffuse[] = {0.f, 0.f, 1.f, 1.f};
-	GLfloat light2_specular[] = {0.f, 0.f, 1.f, 1.f};
+	GLfloat light2_diffuse[] = {1.f, 1.f, 1.f, 1.f};
+	GLfloat light2_specular[] = {1.f, 1.f, 1.f, 1.f};
 	GLfloat spot2_direction[] = {0.5f, -1.f, 0.f};
 	GLfloat light2_position[] = {-5.f, 10.f, 0.f, 1.0f};
 	drawSphere(-5, 10, 0);
@@ -169,8 +237,8 @@ void applyLight(){
 	glLightf(GL_LIGHT3, GL_QUADRATIC_ATTENUATION, 0.5);
 
 	// Spot light 4
-	GLfloat light4_diffuse[] = {0.0f, 1.f, 0.0f, 1.f};
-	GLfloat light4_specular[] = {0.0f, 1.f, 0.3f, 1.f};
+	GLfloat light4_diffuse[] = {1.0f, 1.f, 1.0f, 1.f};
+	GLfloat light4_specular[] = {1.0f, 1.f, 1.0f, 1.f};
 	GLfloat spot4_direction[] = {0.0f, 0.0f, -1.0f};
 	GLfloat light4_position[] = {0.1f, 0.f, 30.f, 1.0f};
 	drawSphere(0, 0, 30);
@@ -198,8 +266,102 @@ void applyLight(){
 	// glLightf(GL_LIGHT5, GL_QUADRATIC_ATTENUATION, 1.5);
 	// glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, 3.0);
 
-	GLfloat light6_diffuse[] = {0.6f, 0.6f, 0.6f, 1.f};
+	GLfloat light6_diffuse[] = {0.2f, 0.2f, 0.2f, 1.f};
 	glLightfv(GL_LIGHT6, GL_DIFFUSE, light6_diffuse);
+
+	GLfloat light7_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat light7_diffuse[] = { 0.6, 0.6, 0.6, 1.0 };
+	GLfloat light7_specular[] = { 0.6, 0.6, 0.6, 1.0 };
+	GLfloat light7_position[] = { 0.0, 0.0, -1.0, 0.0 };
+	glLightfv(GL_LIGHT7, GL_AMBIENT, light7_ambient);
+	glLightfv(GL_LIGHT7, GL_POSITION, light7_position);
+	glLightfv(GL_LIGHT7, GL_DIFFUSE, light7_diffuse);
+	glLightfv(GL_LIGHT7, GL_SPECULAR, light7_specular);
+}
+void applyColorLight(){
+	glDisable(GL_LIGHTING);
+	// glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+	glEnable(GL_LIGHTING);
+	// glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+	glEnable(GL_LIGHT2);
+	glEnable(GL_LIGHT3);
+	glEnable(GL_LIGHT4);
+	glEnable(GL_LIGHT5);
+	// glEnable(GL_LIGHT6);
+	// glEnable(GL_LIGHT7);
+
+	GLfloat light0_diffuse[] = {0.1f, 0.1f, 0.1f, 1.f};
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_diffuse);
+
+	// Purple Spot light
+	GLfloat light1_diffuse[] = {1.f, 0.f, 1.f, 1.f};
+	GLfloat light1_specular[] = {1.f, 0.f, 1.f, 1.f};
+	GLfloat spot1_direction[] = {0.5f, -1.f, 0.f};
+	GLfloat light1_position[] = {-3.f, 6.f, 0.f, 1.0f};
+	drawSphere(-3, 6, 0);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, light1_specular);
+	glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, light1_diffuse);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 60.f);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot1_direction);
+	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.5);
+
+	// Green Spot light
+	GLfloat light2_diffuse[] = {0.f, 1.f, 0.f, 1.f};
+	GLfloat light2_specular[] = {0.f, 1.f, 0.f, 1.f};
+	GLfloat spot2_direction[] = {-0.5f, 1.f, 0.f};
+	GLfloat light2_position[] = {3.f, -6.f, 0.f, 1.0f};
+	drawSphere(3, -6, 0);
+	glLightfv(GL_LIGHT2, GL_SPECULAR, light2_specular);
+	glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, light2_diffuse);
+	glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 60.f);
+	glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, spot2_direction);
+	glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.5);
+
+	// Point Light
+	GLfloat light3_diffuse[] = {0.0f, 0.2f, 0.8f, 1.f};
+	GLfloat light3_specular[] = {0.0f, 0.2f, 0.8f, 1.f};
+	GLfloat light3_position[] = {3, 0, 3, 1.0};
+	drawSphere(3, 0, 3);
+	glLightfv(GL_LIGHT3, GL_SPECULAR, light3_specular);
+	glLightfv(GL_LIGHT3, GL_POSITION, light3_position);
+	glLightfv(GL_LIGHT3, GL_DIFFUSE, light3_diffuse);
+	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 113.0);
+	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT3, GL_QUADRATIC_ATTENUATION, 0.5);
+
+	// Point Light
+	GLfloat light4_diffuse[] = {0.0f, 0.2f, 0.8f, 1.f};
+	GLfloat light4_specular[] = {0.0f, 0.2f, 0.8f, 1.f};
+	GLfloat light4_position[] = {-3, 0, -3, 1.0};
+	drawSphere(-3, 0, -3);
+	glLightfv(GL_LIGHT4, GL_SPECULAR, light4_specular);
+	glLightfv(GL_LIGHT4, GL_POSITION, light4_position);
+	glLightfv(GL_LIGHT4, GL_DIFFUSE, light4_diffuse);
+	glLightf(GL_LIGHT4, GL_CONSTANT_ATTENUATION, 113.0);
+	glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT4, GL_QUADRATIC_ATTENUATION, 0.5);
+
+	// Green Spot light
+	GLfloat light5_diffuse[] = {0.f, 0.f, 1.f, 1.f};
+	GLfloat light5_specular[] = {0.f, 0.f, 1.f, 1.f};
+	GLfloat spot5_direction[] = {-1.0f, 0.f, 0.f};
+	GLfloat light5_position[] = {16.f, 0.f, 0.f, 1.0f};
+	drawSphere(16, 0, 0);
+	glLightfv(GL_LIGHT5, GL_SPECULAR, light5_specular);
+	glLightfv(GL_LIGHT5, GL_POSITION, light5_position);
+	glLightfv(GL_LIGHT5, GL_DIFFUSE, light5_diffuse);
+	glLightf(GL_LIGHT5, GL_SPOT_CUTOFF, 15.f);
+	glLightfv(GL_LIGHT5, GL_SPOT_DIRECTION, spot5_direction);
+	glLightf(GL_LIGHT5, GL_CONSTANT_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT5, GL_QUADRATIC_ATTENUATION, 0.5);
 }
 
 void drawAxies(){
@@ -264,6 +426,7 @@ void draw(){
 	gluLookAt(cam.eyePos.x, cam.eyePos.y, cam.eyePos.z, camVecs.lookVec.x+cam.eyePos.x, camVecs.lookVec.y+cam.eyePos.y, camVecs.lookVec.z+cam.eyePos.z, camVecs.upVec.x, camVecs.upVec.y, camVecs.upVec.z);
 
 	applyLight();
+	// applyColorLight();
 	// drawAxies();
 	// drawSphere();
 	// glutSolidSphere(3, 20, 20);
@@ -279,7 +442,14 @@ void draw(){
 		}
 		glScalef(objs[i].scale.x, objs[i].scale.y, objs[i].scale.z);
 		parsers[i].applyMtl();
+	    glEnable(GL_TEXTURE_2D);
+		if(i==0)
+	    	glBindTexture(GL_TEXTURE_2D, tex1);
+		else
+			glBindTexture(GL_TEXTURE_2D, tex2);
 		parsers[i].drawObj();
+		glBindTexture(GL_TEXTURE_2D, 0);
+    	glDisable( GL_TEXTURE_2D );
 		glPopMatrix();
 	}
 
@@ -530,6 +700,44 @@ void parseConfig(std::string path){
 	}
 }
 
+void genTexture() {
+    // texture
+
+	// Hard coding two textures for now
+    glEnable(GL_TEXTURE_2D);
+    glGenTextures(1, &tex1);
+    glBindTexture(GL_TEXTURE_2D, tex1);
+
+    loadImage("/home/nicholasjw/Documents/Graphics/SampleOBJ/apple_textured_obj/textures/appleD.jpg");
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgBuffer);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //glGenerateMipmap(GL_TEXTURE_2D);  // mip map
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+
+    glGenTextures(1, &tex2);
+    glBindTexture(GL_TEXTURE_2D, tex2);
+
+    loadImage("Key/key.bmp");
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgBuffer);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //glGenerateMipmap(GL_TEXTURE_2D);  // mip map
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+
+}
+
+
 int main(int argc, char* argv[]){
 	if(argc < 2||argc > 2){
 		std::cerr << "PLease specify the config file." << std::endl;
@@ -559,6 +767,7 @@ int main(int argc, char* argv[]){
 
 	// GL
 	initialize();
+	genTexture();
 	glutReshapeFunc(resize);
 	glutDisplayFunc(draw);
 	glutKeyboardFunc(keyPressed);

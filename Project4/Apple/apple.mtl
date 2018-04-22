@@ -2,13 +2,9 @@
 # Material Count: 1
 
 newmtl QuadMesh1
-Ns 9.803922
-Ka 1.000000 1 1 
-Kd 1.000000 1 1 
-Ks 1.000000 1 1 
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+Ks 1.0 1.0 1.0
 map_Kd /home/nicholasjw/Documents/Graphics/SampleOBJ/apple_textured_obj/textures/appleD.jpg
 map_Bump /home/nicholasjw/Documents/Graphics/SampleOBJ/apple_textured_obj/textures/appleN.jpg
+Ns 9.803922

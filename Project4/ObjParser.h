@@ -29,7 +29,7 @@ private:
     };
 
     std::vector< glm::vec3 > vertices;
-    std::vector< glm::vec3 > texts;
+    std::vector< std::pair<float, float> > texts;
     std::vector< glm::vec3 > normals;
     std::vector< face > faces;
     std::pair<std::string, std::string> mtlInfo = {"", ""};
