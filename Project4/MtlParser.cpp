@@ -7,12 +7,13 @@ MtlParser::MtlParser(std::string file, std::string mtl){
     ifstream infile;
     infile.open(file.c_str());
     // cout << file << endl;
-    if(!infile.good()){
-        throw invalid_argument("Failed to open MTL file.");
-    }
+    // if(!infile.good()){
+    //     throw invalid_argument("Failed to open MTL file.");
+    // }
 
     string line;
     while(getline(infile, line)){
+        // cout << "check" << endl;
         if(line == "newmtl " + mtlName){
             cout << line << endl;
             while(getline(infile, line)){
@@ -60,6 +61,7 @@ MtlParser::MtlParser(std::string file, std::string mtl){
         }
     }
 
+    infile.close();
     // for(int i=0; i<4; i++){
     //     std::cout << mat_amb[i];
     // }

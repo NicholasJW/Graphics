@@ -51,6 +51,7 @@ ObjParser::ObjParser(std::string path){
                 vertex cv;
                 cv.vIndex = stoi(v)-1;
                 cv.tIndex = stoi(t)-1;
+                // cv.tIndex = 0;
                 cv.nIndex = stoi(n)-1;
                 switch(i){
                     case 0:
@@ -72,13 +73,15 @@ ObjParser::ObjParser(std::string path){
             faces.push_back(cf);
         }else if(line.substr(0, 7) == "mtllib "){
             mtlInfo.first = line.substr(7);
+            cout << mtlInfo.first << endl;
         }else if(line.substr(0, 7) == "usemtl "){
             mtlInfo.second = line.substr(7);
+            cout << mtlInfo.second << endl;
         }
 	}
+    infile.close();
 
     mp = new MtlParser(mtlInfo.first, mtlInfo.second);
-    infile.close();
 
 }
 

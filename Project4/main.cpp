@@ -108,17 +108,18 @@ void applyLight(){
 	// glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHT1);
-	glEnable(GL_LIGHT2);
-	glEnable(GL_LIGHT3);
-	glEnable(GL_LIGHT4);
-	glEnable(GL_LIGHT5);	
+	// glEnable(GL_LIGHT1);
+	// glEnable(GL_LIGHT2);
+	// glEnable(GL_LIGHT3);
+	// glEnable(GL_LIGHT4);
+	// glEnable(GL_LIGHT5);
+	// glEnable(GL_LIGHT6);	
 
 	// Directional grey light
 	// Facing negative-y axis
 	GLfloat light0_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
-	GLfloat light0_diffuse[] = { 0.0, 0.0, 0.0, 1.0 };
-	GLfloat light0_specular[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat light0_diffuse[] = { 0.6, 0.6, 0.6, 1.0 };
+	GLfloat light0_specular[] = { 0.6, 0.6, 0.6, 1.0 };
 	GLfloat light0_position[] = { 0.0, 1.0, 0.0, 0.0 };
 	glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
 	glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
@@ -178,9 +179,9 @@ void applyLight(){
 	glLightfv(GL_LIGHT4, GL_DIFFUSE, light4_diffuse);
 	glLightf(GL_LIGHT4, GL_SPOT_CUTOFF, 15.f);
 	glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot4_direction);
-	glLightf(GL_LIGHT4, GL_CONSTANT_ATTENUATION, 2);
-	glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, 1.0);
-	glLightf(GL_LIGHT4, GL_QUADRATIC_ATTENUATION, 0.5);
+	// glLightf(GL_LIGHT4, GL_CONSTANT_ATTENUATION, 2);
+	// glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, 1.0);
+	// glLightf(GL_LIGHT4, GL_QUADRATIC_ATTENUATION, 0.5);
 
 	// Spot light 5
 	GLfloat light5_diffuse[] = {1.f, 1.f, 0.f, 1.f};
@@ -193,9 +194,12 @@ void applyLight(){
 	glLightfv(GL_LIGHT5, GL_DIFFUSE, light5_diffuse);
 	glLightf(GL_LIGHT5, GL_SPOT_CUTOFF, 60.f);
 	glLightfv(GL_LIGHT5, GL_SPOT_DIRECTION, spot5_direction);
-	glLightf(GL_LIGHT5, GL_CONSTANT_ATTENUATION, 3.0);
-	glLightf(GL_LIGHT5, GL_QUADRATIC_ATTENUATION, 1.5);
-	glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, 3.0);
+	// glLightf(GL_LIGHT5, GL_CONSTANT_ATTENUATION, 3.0);
+	// glLightf(GL_LIGHT5, GL_QUADRATIC_ATTENUATION, 1.5);
+	// glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, 3.0);
+
+	GLfloat light6_diffuse[] = {0.6f, 0.6f, 0.6f, 1.f};
+	glLightfv(GL_LIGHT6, GL_DIFFUSE, light6_diffuse);
 }
 
 void drawAxies(){
@@ -262,6 +266,7 @@ void draw(){
 	applyLight();
 	// drawAxies();
 	// drawSphere();
+	// glutSolidSphere(3, 20, 20);
 	// Drawing
 	for (size_t i = 0; i < parsers.size(); i++){
 		glColor3f(objs[i].color.x, objs[i].color.y, objs[i].color.z);
@@ -273,9 +278,9 @@ void draw(){
 			glRotatef((angle)%360, 0.0f, 1.0f, 0.0f);	
 		}
 		glScalef(objs[i].scale.x, objs[i].scale.y, objs[i].scale.z);
+		parsers[i].applyMtl();
 		parsers[i].drawObj();
 		glPopMatrix();
-		parsers[i].applyMtl();
 	}
 
 	// Particle System
